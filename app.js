@@ -65,7 +65,7 @@ async function main(context){
 	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,"bot1.bot");
 
 	if (context.activity.type === 'conversationUpdate' && context.activity.membersAdded[0].name !== 'Bot') {
-		 await context.sendActivity("## Welcome to the Bot!");
+		 await context.sendActivity("## Welcome to the Bot!","Welcome to the bot");
 		 //lambotenginecore.RenderConversationThread(storage, state, session, context, dc, myBot);
 	} else
     if (context.activity.type === 'message') {

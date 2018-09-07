@@ -210,7 +210,7 @@ module.exports={
                 await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
             case "MESSAGE":
-                await context.sendActivity(messageToDisplay)
+                await context.sendActivity(messageToDisplay,messageToDisplay);
     
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
         
@@ -226,7 +226,14 @@ module.exports={
                 await context.sendActivity(this.getSuggestedActions(messageToDisplay,currentThread.next));
                 break;
             case "LUIS":
-                await context.sendActivity(messageToDisplay);
+                await context.sendActivity(messageToDisplay,messageToDisplay);
+                break;
+            case "START":
+                await context.sendActivity(messageToDisplay,messageToDisplay);
+    
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+        
+                await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
         
             default:
