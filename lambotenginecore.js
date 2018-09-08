@@ -210,8 +210,9 @@ module.exports={
                 await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
             case "MESSAGE":
-                await context.sendActivity(messageToDisplay,messageToDisplay);
-    
+                await context.sendActivity(messageToDisplay, 
+                '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">Sample Text spoken by Cortana.</speak>',
+                'expectingInput');
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
         
                 //WORKING ON REMOVING THIS FROM AZURE STORAGE AND USING ONLY THE SESSION
@@ -237,7 +238,11 @@ module.exports={
                 break;
         
             default:
-                await dc.prompt('textPrompt', currentThread.text);
+            await context.sendActivity(messageToDisplay, 
+                '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">' + messageToDisplay + '</speak>',
+                'expectingInput');
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+                //await dc.prompt('textPrompt', currentThread.text);
                 //await context.sendActivity(currentThread.text);
                 break;
         }
