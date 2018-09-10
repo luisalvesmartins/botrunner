@@ -313,7 +313,8 @@ function alexaSays(req, res, bot, next) {
     if (client) {
       client.trackException({exception: new Error("Unhandled request type")});
     }
-    return next(new restify.InvalidArgumentError("Unhandled request type"));
+    console.log(req.body);
+    return next();
   }
 }
 
