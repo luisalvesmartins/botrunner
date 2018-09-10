@@ -1,5 +1,4 @@
 "use strict";
-
 // This loads the environment variables from the .env file - updated from .config for continuous deployment
 require('dotenv').load();
 
@@ -295,7 +294,8 @@ function alexaIntent(req, res, bot, next) {
 
 // Alexa is calling us with the utterance
 function alexaSays(req, res, bot, next) {
-  //console.log("Alexa says:");
+//  console.log("Alexa says:");
+//  console.log(req.body)
   //console.log(util.inspect(req.body, false, null));
   if (req.body && req.body.request && req.body.request.type &&
     req.body.request.type == "IntentRequest") {
@@ -317,8 +317,10 @@ function alexaSays(req, res, bot, next) {
   }
 }
 
+
 function startBridge() {
-  var opts = { secret: config.directLineSecret, webSocket: config.useWebsocket, domain: config.domain };
+    var opts = { secret: config.directLineSecret, webSocket: config.useWebsocket, domain: config.domain };
+    console.log(JSON.stringify(opts));
   var connector = new directLine.DirectLine(opts);
 
   connector.activity$
@@ -345,8 +347,10 @@ function startBridge() {
 //   });
 
 //   return server;
+return connector;
 }
 
 module.exports = {
-  start: startBridge
+  start: startBridge,
+  says: alexaSays
 };

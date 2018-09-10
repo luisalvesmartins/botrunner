@@ -4,7 +4,7 @@ const { BotFrameworkAdapter, BotStateSet, ConsoleAdapter, ConversationState, Mem
 //const { TableStorage } = require('botbuilder-azure');
 const botbuilder_dialogs = require('botbuilder-dialogs');
 const restify = require('restify');
-const alexaSays= require('./alexaBridge/alexaBridge.js')
+const alexa= require('./alexaBridge/alexaBridge.js')
 var storage = require('azure-storage');
 require('dotenv').config();
 //#endregion
@@ -48,7 +48,7 @@ else
         console.log(`${server.name} listening to ${server.url}`);
 	});
 	//ALEXABRIDGE
-	server.post('/messages', (req, res, err) => alexaSays(req, res, connector, err));
+	server.post('/messages', (req, res, err) => {var connector=alexa.start(); alexa.says(req, res, connector, err)});
 	//BOT
     server.post('/api/messages', (req, res) => {
         adapter.processActivity(req, res, async (context) => {
