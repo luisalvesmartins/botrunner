@@ -1,5 +1,5 @@
 "use strict";
-
+const restify = require('restify');
 var util = require('util');
 var crypto = require('crypto');
 var directLine = require('botframework-directlinejs');

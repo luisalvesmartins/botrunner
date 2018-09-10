@@ -49,6 +49,7 @@ else
         console.log(`${server.name} listening to ${server.url}`);
 	});
 	//ALEXABRIDGE
+	server.use(restify.plugins.bodyParser());
 	server.post('/messages', (req, res, err) => alexa.says(req, res, err));
 	//BOT
     server.post('/api/messages', (req, res) => {
