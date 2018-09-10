@@ -161,13 +161,32 @@ function botSays(activity) {
   }
 
   if (activity.replyToId in msgParts) {
-      console.log("IN")
     // Back once again for the renegade master - store additional responses but send them when they've all had chance to come in
     msgParts[activity.replyToId].push(activity);
   }
   else {
-    console.log("OUT")
     msgParts[activity.replyToId] = [activity];
+
+    var reply = createAlexaReply(activity);
+
+    // Double check we've got the original request message - otherwise we have nothing to respond to and it's gameover for this message
+    if (activity.replyToId in responses) {
+        console.log("SEND:");
+        console.log(activity.replyToId);
+        responses[activity.replyToId].push(reply);
+
+      let alexaResponseDuration = Date.now() - startTime;
+      if (client) {
+        client.trackMetric({ name: "Alexa Response Duration", value: alexaResponseDuration });
+      }
+      console.log("Alexa Response Duration: " + alexaResponseDuration);
+
+      sendReply(activity.replyToId);
+    }
+    else
+        console.log("NOTHING");
+
+
 
     // Max time to wait for all bot responses to come back before we ship them off to Alexa
     // You can play with the timeout value depending on how long your responses take to come back from your
