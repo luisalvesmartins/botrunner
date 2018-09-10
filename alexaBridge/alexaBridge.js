@@ -145,6 +145,7 @@ function botSays(activity) {
   // When you only have exactly 1 bot response per user request you can safely do this - otherwise you'll need to support
   // multiple messages coming back from the bot.  However, if message is a user prompt - then we don't want to delay
   if ((process.env.useMultipleResponses == 'false' || activity.inputHint == 'expectingInput') && activity.replyToId in responses) {
+      console.log("PUSH");
     msgParts[activity.replyToId] = [activity];
     var reply = createAlexaReply(activity);
     responses[activity.replyToId].push(reply);
@@ -160,10 +161,12 @@ function botSays(activity) {
   }
 
   if (activity.replyToId in msgParts) {
+      console.log("IN")
     // Back once again for the renegade master - store additional responses but send them when they've all had chance to come in
     msgParts[activity.replyToId].push(activity);
   }
   else {
+    console.log("OUT")
     msgParts[activity.replyToId] = [activity];
 
     // Max time to wait for all bot responses to come back before we ship them off to Alexa
