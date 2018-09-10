@@ -200,7 +200,7 @@ module.exports={
             messageToDisplay=messageToDisplay.replace("{" + key + "}",UserActivityResults[key]);
         }
         this.log("THREAD:" + currentThread.type);
-        var messageToSpeak='<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">' + messageToDisplay + '</speak>',
+        var messageToSpeak=messageToDisplay;
         switch (currentThread.type) {
             case "IF":
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
@@ -214,8 +214,8 @@ module.exports={
                 await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
             case "INPUT":
-                await dc.prompt('textPrompt', messageToDisplay);
-                //await context.sendActivity(currentThread.text);
+                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
+                //await dc.prompt('textPrompt', messageToDisplay);
                 break;
             case "CHOICE":
                 await context.sendActivity(this.getSuggestedActions(messageToDisplay,currentThread.next));

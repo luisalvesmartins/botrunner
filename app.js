@@ -84,14 +84,9 @@ async function main(context){
 		}
 		
 		if(!context.responded){
-			console.log("RESPONDED");
 			await lambotenginecore.RenderConversationThread(storage, state, session, context, dc, myBot)
 		}
-		else
-		{
-			console.log("RESPONDED");
-		}
-				
+			
 
     }
 
