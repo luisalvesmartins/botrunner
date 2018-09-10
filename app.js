@@ -62,7 +62,7 @@ async function main(context){
     var session = state.session === undefined ? state.session=lambotenginecore.guid() : state.session;
 	const dc = dialogs.createContext(context, state);
 
-	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,"bot1.bot");
+	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,"fsi.bot");
 
 	if (context.activity.type === 'conversationUpdate' && context.activity.membersAdded[0].name !== 'Bot') {
 		 await context.sendActivity("## Welcome to the Bot!","Welcome to the bot");
@@ -70,14 +70,9 @@ async function main(context){
 	} else
     if (context.activity.type === 'message') {
 		//PROCESS SPECIAL RESPONSE
-		if (context.activity.text.toUpperCase().startsWith("#DATA"))
+		if (context.activity.text.toUpperCase().startsWith("DEBUG"))
 		{
 			await context.sendActivity("Data collected: " + JSON.stringify(state.UserActivityResults));
-			return;
-		}
-		if (context.activity.text.toUpperCase().startsWith("#SESSION"))
-		{
-			await context.sendActivity("SESSION: " + session,session);
 			return;
 		}
 
