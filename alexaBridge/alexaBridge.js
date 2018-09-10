@@ -18,7 +18,7 @@ var request = require('request');
 global.XMLHttpRequest = require("xhr2");
 
 var config = {};
-config.botId = process.env.botId;
+config.botId = process.env.BotId;
 config.directLineSecret = process.env.directLineSecret;
 config.domain = process.env.directLineDomain || "https://directline.botframework.com/v3/directline";
 config.useWebsocket = process.env.useWebsocket || true;
@@ -190,7 +190,7 @@ function botSays(activity) {
         if (client){
           client.trackEvent({name: "Missed message", properties: {"activity.replyToId": activity.replyToId, "activity.text" : activity.text}});
         }
-        console.log("Missed message (not received before timeout): " + activity.replyToId + ": " + activity.text);
+        console.log("Missed message (not received before timeout of " + process.env.multipleResponsesTimeout + "): " + activity.replyToId + ": " + activity.text);
       }
     }, process.env.multipleResponsesTimeout);
   }
@@ -201,6 +201,8 @@ function alexaIntent(req, res, bot, next) {
   let startTime = Date.now();
 
   var userId = req.body.session.user.userId;
+
+console.log("ALEXA CALLED:" + req.body.request.intent.name);
 
   // Substitute Amazon's default built-in intents - choose how you want to implement these eg. in LUIS
   var utterance = "";

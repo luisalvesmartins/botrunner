@@ -47,8 +47,9 @@ else
     server.listen(process.env.port || process.env.PORT || 3979, function () {
         console.log(`${server.name} listening to ${server.url}`);
 	});
+	var connector=alexa.start();
 	//ALEXABRIDGE
-	server.post('/messages', (req, res, err) => {var connector=alexa.start(); alexa.says(req, res, connector, err)});
+	server.post('/messages', (req, res, err) => alexa.says(req, res, connector, err));
 	//BOT
     server.post('/api/messages', (req, res) => {
         adapter.processActivity(req, res, async (context) => {
