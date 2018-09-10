@@ -1,5 +1,8 @@
 "use strict";
 
+// This loads the environment variables from the .env file - updated from .config for continuous deployment
+require('dotenv').load();
+
 // Connects to AppInsights comment out the following three lines if you aren't using appinsights
 var appInsights = require('applicationinsights');
 appInsights.setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY).start(); // reads in from APPINSIGHTS_INSTRUMENTATIONKEY by default in the .env file
@@ -10,8 +13,6 @@ var restify = require('restify');
 var directLine = require('botframework-directlinejs');
 var request = require('request');
 
-// This loads the environment variables from the .env file - updated from .config for continuous deployment
-require('dotenv-extended').load();
 
 // Required to make rxjs ajax run browser-less
 //global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
