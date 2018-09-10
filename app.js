@@ -10,6 +10,7 @@ require('dotenv').config();
 //#endregion
 
 //#region initializations
+alexa.start();
 var adapter;
 // Create adapter
 if (process.env.CONSOLE=='YES')
@@ -47,9 +48,8 @@ else
     server.listen(process.env.port || process.env.PORT || 3979, function () {
         console.log(`${server.name} listening to ${server.url}`);
 	});
-	var connector=alexa.start();
 	//ALEXABRIDGE
-	server.post('/messages', (req, res, err) => alexa.says(req, res, connector, err));
+	server.post('/messages', (req, res, err) => alexa.says(req, res, err));
 	//BOT
     server.post('/api/messages', (req, res) => {
         adapter.processActivity(req, res, async (context) => {

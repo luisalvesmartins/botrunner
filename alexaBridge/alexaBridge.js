@@ -1,24 +1,19 @@
 "use strict";
-// This loads the environment variables from the .env file - updated from .config for continuous deployment
-require('dotenv').load();
 
-// Connects to AppInsights comment out the following three lines if you aren't using appinsights
-var appInsights = require('applicationinsights');
-appInsights.setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY).start(); // reads in from APPINSIGHTS_INSTRUMENTATIONKEY by default in the .env file
-let client = appInsights.defaultClient;
-
+var util = require('util');
 var crypto = require('crypto');
-var restify = require('restify');
 var directLine = require('botframework-directlinejs');
 var request = require('request');
 
+// This loads the environment variables from the .env file - updated from .config for continuous deployment
+require('dotenv-extended').load();
 
 // Required to make rxjs ajax run browser-less
 //global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 global.XMLHttpRequest = require("xhr2");
 
 var config = {};
-config.botId = process.env.BotId;
+config.botId = process.env.botId;
 config.directLineSecret = process.env.directLineSecret;
 config.domain = process.env.directLineDomain || "https://directline.botframework.com/v3/directline";
 config.useWebsocket = process.env.useWebsocket || true;
@@ -145,15 +140,11 @@ function botSays(activity) {
   // When you only have exactly 1 bot response per user request you can safely do this - otherwise you'll need to support
   // multiple messages coming back from the bot.  However, if message is a user prompt - then we don't want to delay
   if ((process.env.useMultipleResponses == 'false' || activity.inputHint == 'expectingInput') && activity.replyToId in responses) {
-      console.log("PUSH");
     msgParts[activity.replyToId] = [activity];
     var reply = createAlexaReply(activity);
     responses[activity.replyToId].push(reply);
 
     let alexaResponseDuration = Date.now() - startTime;
-    if (client) {
-      client.trackMetric({ name: "Alexa Response Duration", value: alexaResponseDuration });
-    }
     console.log("Alexa Response Duration: " + alexaResponseDuration);
 
     sendReply(activity.replyToId);
@@ -167,27 +158,6 @@ function botSays(activity) {
   else {
     msgParts[activity.replyToId] = [activity];
 
-    var reply = createAlexaReply(activity);
-
-    // Double check we've got the original request message - otherwise we have nothing to respond to and it's gameover for this message
-    if (activity.replyToId in responses) {
-        console.log("SEND:");
-        console.log(activity.replyToId);
-        responses[activity.replyToId].push(reply);
-
-      let alexaResponseDuration = Date.now() - startTime;
-      if (client) {
-        client.trackMetric({ name: "Alexa Response Duration", value: alexaResponseDuration });
-      }
-      console.log("Alexa Response Duration: " + alexaResponseDuration);
-
-      sendReply(activity.replyToId);
-    }
-    else
-        console.log("NOTHING");
-
-
-
     // Max time to wait for all bot responses to come back before we ship them off to Alexa
     // You can play with the timeout value depending on how long your responses take to come back from your
     // bot in the case of long running processes.  However, you must get something back to Alexa within <8 secs
@@ -200,19 +170,13 @@ function botSays(activity) {
         responses[activity.replyToId].push(reply);
 
         let alexaResponseDuration = Date.now() - startTime;
-        if (client) {
-          client.trackMetric({ name: "Alexa Response Duration", value: alexaResponseDuration });
-        }
         console.log("Alexa Response Duration: " + alexaResponseDuration);
 
         sendReply(activity.replyToId);
       }
       else {
         // Didn't receive this one in time :(
-        if (client){
-          client.trackEvent({name: "Missed message", properties: {"activity.replyToId": activity.replyToId, "activity.text" : activity.text}});
-        }
-        console.log("Missed message (not received before timeout of " + process.env.multipleResponsesTimeout + "): " + activity.replyToId + ": " + activity.text);
+        console.log("Missed message (not received before timeout): " + activity.replyToId + ": " + activity.text);
       }
     }, process.env.multipleResponsesTimeout);
   }
@@ -224,10 +188,9 @@ function alexaIntent(req, res, bot, next) {
 
   var userId = req.body.session.user.userId;
 
-console.log("ALEXA CALLED:" + req.body.request.intent.name);
-
   // Substitute Amazon's default built-in intents - choose how you want to implement these eg. in LUIS
   var utterance = "";
+  console.log("req.body.request.intent.name")
   switch (req.body.request.intent.name) {
     case "AMAZON.HelpIntent":
       utterance = "Help";
@@ -238,7 +201,13 @@ console.log("ALEXA CALLED:" + req.body.request.intent.name);
     case "AMAZON.StopIntent":
       utterance = "Stop";
       break;
+    case "GetUserIntent":
+      utterance = req.body.request.intent.slots.phrase.value;
+      console.log("UTERANCE")
+      console.log(utterance);
+      break;
     default:
+      console.log("UNKNOWN INTENT")
       utterance = req.body.request.intent.slots.phrase.value;
   }
 
@@ -274,9 +243,6 @@ console.log("ALEXA CALLED:" + req.body.request.intent.name);
       if (id != 'retry') {
 
         let duration = Date.now() - startTime;
-        if (client) {
-          client.trackMetric({ name: "connector response time", value: duration });
-        }
         console.log("connector response time: " + duration);
 
         // Store the response objects
@@ -294,33 +260,24 @@ console.log("ALEXA CALLED:" + req.body.request.intent.name);
             function (error, response, body) {
               console.log("Progressive response status code: " + response.statusCode);
               if (!error && response.statusCode == 200) {
-                if (client) {
-                  client.trackException({exception: new Error(error)});
-                }
                 console.log(body);
               }
             });
         }
       }
     }, error => {
-      if (client) {
-        client.trackException({exception: new Error(error)});
-      }
       console.warn("failed to send postBack", error);
     });
 
     let intentDuration = Date.now() - startTime;
-    if (client) {
-      client.trackMetric({ name: "alexaIntent Duration", value: intentDuration });
-    }
     console.log("alexaIntent response time: " + intentDuration);
 }
 
 // Alexa is calling us with the utterance
-function alexaSays(req, res, bot, next) {
-//  console.log("Alexa says:");
-//  console.log(req.body)
-  //console.log(util.inspect(req.body, false, null));
+function alexaSays(req, res, next) {
+  var bot=connector;
+  console.log("Alexa says:");
+  console.log(util.inspect(req.body, false, null));
   if (req.body && req.body.request && req.body.request.type &&
     req.body.request.type == "IntentRequest") {
     alexaIntent(req, res, bot, next);
@@ -334,19 +291,14 @@ function alexaSays(req, res, bot, next) {
     next();
   }
   else {
-    if (client) {
-      client.trackException({exception: new Error("Unhandled request type")});
-    }
-    console.log(req.body);
-    return next();
+    return next(new restify.InvalidArgumentError("Unhandled request type"));
   }
 }
 
-
+var connector;
 function startBridge() {
-    var opts = { secret: config.directLineSecret, webSocket: config.useWebsocket, domain: config.domain };
-    console.log(JSON.stringify(opts));
-  var connector = new directLine.DirectLine(opts);
+  var opts = { secret: config.directLineSecret, webSocket: config.useWebsocket, domain: config.domain };
+  connector = new directLine.DirectLine(opts);
 
   connector.activity$
     .filter(activity => activity.type === 'message' && activity.from.id === botId && activity.replyToId)
@@ -354,28 +306,13 @@ function startBridge() {
       botSays,
       error => {
         console.log("activity$ error", error);
-        if (client) {
-          client.trackException({exception: new Error(error)});
-        }
       }
     );
 
-//   var server = restify.createServer();
-//   server.use(restify.plugins.bodyParser());
-//   server.post('/messages', (req, res, err) => alexaSays(req, res, connector, err));
-
-//   server.listen(process.env.port || process.env.PORT || 8080, function () {
-//     console.log('%s listening at %s', server.name, server.url);
-//     if (client) {
-//       client.trackEvent({name: "Listening", properties: {"server.name": server.name, "server.url" : server.url}});
-//     }
-//   });
-
-//   return server;
-return connector;
+    return connector;
 }
 
 module.exports = {
   start: startBridge,
-  says: alexaSays
+  says:alexaSays
 };
