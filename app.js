@@ -59,7 +59,7 @@ else
 async function main(context){
     const state = convoState.get(context);
 	var botPointer = state.pointer === undefined ? state.pointer=0 : state.pointer;
-	var session=state.session;
+    var session = state.session === undefined ? state.session=lambotenginecore.guid() : state.session;
 	const dc = dialogs.createContext(context, state);
 
 	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,"bot1.bot");
@@ -70,11 +70,16 @@ async function main(context){
 	} else
     if (context.activity.type === 'message') {
 		//PROCESS SPECIAL RESPONSE
-		// if (context.activity.text.toUpperCase().startsWith("#DATA"))
-		// {
-		// 	await context.sendActivity("Data collected: " + JSON.stringify(state.UserActivityResults));
-		// 	return;
-		// }
+		if (context.activity.text.toUpperCase().startsWith("#DATA"))
+		{
+			await context.sendActivity("Data collected: " + JSON.stringify(state.UserActivityResults));
+			return;
+		}
+		if (context.activity.text.toUpperCase().startsWith("#SESSION"))
+		{
+			await context.sendActivity("SESSION: " + session,session);
+			return;
+		}
 
 		await lambotenginecore.PreProcessing(state,myBot,botPointer,context.activity.text)
 
