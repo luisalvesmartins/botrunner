@@ -20,6 +20,7 @@
     "botframework-directlinejs": "^0.9.17",
     "crypo": "^0.1.4",
     "dotenv": "^6.0.0",
+    "dotenv-extended": "^2.0.2",
     "node-eval": "^2.0.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
