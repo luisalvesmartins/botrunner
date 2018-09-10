@@ -191,7 +191,6 @@ module.exports={
     RenderConversationThread: async function (storage, state, session, context, dc, myBot)
     {
         var UserActivityResults = state.UserActivityResults === undefined ? state.UserActivityResults={} : state.UserActivityResults;
-        var botName = state.botName === undefined ? state.botName="bot1" : state.botName;
         var botPointer = state.pointer === undefined ? state.pointer=0 : state.pointer;
         
         var currentThread=myBot[botPointer];
@@ -200,23 +199,18 @@ module.exports={
         for(var key in UserActivityResults){
             messageToDisplay=messageToDisplay.replace("{" + key + "}",UserActivityResults[key]);
         }
-      console.log(currentThread.type)
+        this.log("THREAD:" + currentThread.type);
+        var messageToSpeak='<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">' + messageToDisplay + '</speak>',
         switch (currentThread.type) {
             case "IF":
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
     
-                //WORKING ON REMOVING THIS FROM AZURE STORAGE AND USING ONLY THE SESSION
-                //this.WriteBotControl(storage, session,myBot[botPointer].key,botName);
                 await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
             case "MESSAGE":
-                await context.sendActivity(messageToDisplay, 
-                '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">Sample Text spoken by Cortana.</speak>',
-                'expectingInput');
+                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
         
-                //WORKING ON REMOVING THIS FROM AZURE STORAGE AND USING ONLY THE SESSION
-                //this.WriteBotControl(storage, session,myBot[botPointer].key,botName);
                 await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
             case "INPUT":
@@ -227,10 +221,10 @@ module.exports={
                 await context.sendActivity(this.getSuggestedActions(messageToDisplay,currentThread.next));
                 break;
             case "LUIS":
-                await context.sendActivity(messageToDisplay,messageToDisplay);
+                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
                 break;
             case "START":
-                await context.sendActivity(messageToDisplay,messageToDisplay);
+                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
     
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
         
@@ -238,12 +232,8 @@ module.exports={
                 break;
         
             default:
-            await context.sendActivity(messageToDisplay, 
-                '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">' + messageToDisplay + '</speak>',
-                'expectingInput');
+                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
-                //await dc.prompt('textPrompt', currentThread.text);
-                //await context.sendActivity(currentThread.text);
                 break;
         }
     },
