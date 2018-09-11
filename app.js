@@ -63,11 +63,17 @@ else
 
 async function main(context){
     const state = convoState.get(context);
-	var botPointer = state.pointer === undefined ? state.pointer=0 : state.pointer;
+	var botPointer = state.pointer === undefined ? state.pointer=-1 : state.pointer;
     var session = state.session === undefined ? state.session=lambotenginecore.guid() : state.session;
 	const dc = dialogs.createContext(context, state);
 
 	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,"fsi.bot");
+	if (botPointer==-1)
+	{
+		botPointer=lambotenginecore.getBotPointerOfStart(myBot);
+		state.pointer=botPointer;
+		state.pointerKey=myBot[botPointer].key;
+	}
 
 	if (context.activity.type === 'conversationUpdate' && context.activity.membersAdded[0].name !== 'Bot') {
 		 await context.sendActivity("## Welcome to the Bot!","Welcome to the bot");

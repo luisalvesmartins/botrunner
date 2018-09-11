@@ -1,3 +1,4 @@
+const { QnAMaker } = require('botbuilder-ai');
 module.exports={
 
     convertDiagramToBot: function(diagram)
@@ -44,6 +45,18 @@ module.exports={
             }
         }
         return -1;
+    },
+
+    getBotPointerOfStart:function(myBot)
+    {
+        for(var f=0;f<myBot.length;f++)
+        {
+            if (myBot[f].type=="START")
+            {
+                return f;
+            }
+        }			
+        return 0;
     },
     
     getSuggestedActions: function (title,items) {
@@ -108,7 +121,7 @@ module.exports={
         {
             // NO CONTINUATION
             if (myBot[botPointer].next.length==0)
-                botPointer=0;
+                botPointer=this.getBotPointerOfStart(myBot);
             else
                 //ONLY ONE OPTION, MOVE NEXT, find the item
                 if (myBot[botPointer].next.length==1)
@@ -202,10 +215,20 @@ module.exports={
         this.log("THREAD:" + currentThread.type);
         var messageToSpeak=messageToDisplay;
         switch (currentThread.type) {
+            case "CHOICE":
+                await context.sendActivity(this.getSuggestedActions(messageToDisplay,currentThread.next));
+                break;
             case "IF":
                 botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
     
                 await this.RenderConversationThread(storage, state, session, context, dc, myBot);
+                break;
+            case "INPUT":
+                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
+                //await dc.prompt('textPrompt', messageToDisplay);
+                break;
+            case "LUIS":
+                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
                 break;
             case "MESSAGE":
                 await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
@@ -213,15 +236,29 @@ module.exports={
         
                 await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
-            case "INPUT":
-                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
-                //await dc.prompt('textPrompt', messageToDisplay);
-                break;
-            case "CHOICE":
-                await context.sendActivity(this.getSuggestedActions(messageToDisplay,currentThread.next));
-                break;
-            case "LUIS":
-                await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
+            case "QNA":
+                const qnaMaker = new QnAMaker(
+                    {
+                        knowledgeBaseId: currentThread.parPar,
+                        endpointKey: currentThread.parKey,
+                        host: currentThread.parURL
+                    },
+                    {
+                        answerBeforeNext: true
+                    }
+                );
+                let answered = await qnaMaker.answer(context);
+                if (!answered) {
+                    if (context.activity.type === 'message' && !context.responded) {
+                        await context.sendActivity('No QnA Maker answers were found."');
+                    } else if (context.activity.type !== 'message') {
+                        await context.sendActivity(`[${context.activity.type} event detected]`);
+                    }
+                }
+
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+        
+                await this.RenderConversationThread(storage, state, session, context, dc, myBot);
                 break;
             case "START":
                 await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
