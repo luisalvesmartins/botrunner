@@ -73,7 +73,7 @@ module.exports={
         return MessageFactory.suggestedActions(suggestedActions, title);
     },
     
-    MoveBotPointer:async function(myBot,botPointer,lastMessage,UserActivityResults,state)
+    MoveBotPointer:async function(myBot,botPointer,lastMessage,UserActivityResults,state,io)
     {
         //MOVENEXT
         //IF THIS IS LUIS, need to process it first
@@ -144,6 +144,10 @@ module.exports={
         state.pointer=botPointer;
         state.pointerKey=myBot[botPointer].key;
     
+        //SEND THE MESSAGE TO THE HTML CLIENT TO UPDATE THE POSITION
+        if (io)
+            io.in(state.session).emit('updateDesigner',myBot[botPointer].key);
+
         return botPointer;
     },
     
@@ -201,7 +205,7 @@ module.exports={
         console.log(" ERROR:" + message);
     },
     
-    RenderConversationThread: async function (storage, state, session, context, dc, myBot)
+    RenderConversationThread: async function (storage, state, session, context, dc, myBot,io)
     {
         var UserActivityResults = state.UserActivityResults === undefined ? state.UserActivityResults={} : state.UserActivityResults;
         var botPointer = state.pointer === undefined ? state.pointer=0 : state.pointer;
@@ -219,9 +223,9 @@ module.exports={
                 await context.sendActivity(this.getSuggestedActions(messageToDisplay,currentThread.next));
                 break;
             case "IF":
-                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state,io);
     
-                await this.RenderConversationThread(storage, state, session, context, dc, myBot);
+                await this.RenderConversationThread(storage, state, session, context, dc, myBot,io);
                 break;
             case "INPUT":
                 await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
@@ -232,9 +236,9 @@ module.exports={
                 break;
             case "MESSAGE":
                 await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
-                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state,io);
         
-                await this.RenderConversationThread(storage, state, session, context, dc, myBot);
+                await this.RenderConversationThread(storage, state, session, context, dc, myBot,io);
                 break;
             case "QNA":
                 const qnaMaker = new QnAMaker(
@@ -256,21 +260,21 @@ module.exports={
                     }
                 }
 
-                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state,io);
         
-                await this.RenderConversationThread(storage, state, session, context, dc, myBot);
+                await this.RenderConversationThread(storage, state, session, context, dc, myBot,io);
                 break;
             case "START":
                 await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
     
-                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state,io);
         
-                await this.RenderConversationThread(storage, state, session, context, dc, myBot);
+                await this.RenderConversationThread(storage, state, session, context, dc, myBot,io);
                 break;
         
             default:
                 await context.sendActivity(messageToDisplay, messageToSpeak, 'expectingInput');
-                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state);
+                botPointer=await this.MoveBotPointer(myBot,botPointer,context.activity.text,UserActivityResults,state,io);
                 break;
         }
     },
@@ -292,7 +296,7 @@ module.exports={
             });
     },
     
-    PreProcessing:async function(state,myBot,botPointer,messageText){
+    PreProcessing:async function(state,myBot,botPointer,messageText,io){
         var UserActivityResults = state.UserActivityResults === undefined ? state.UserActivityResults={} : state.UserActivityResults;
     
         //STORE THE ACTUAL RESULT IN THE VARIABLE
@@ -304,7 +308,7 @@ module.exports={
         }
     
         //MOVE IT TO THE NEXT
-        botPointer=await this.MoveBotPointer(myBot,botPointer,messageText,UserActivityResults,state);
+        botPointer=await this.MoveBotPointer(myBot,botPointer,messageText,UserActivityResults,state,io);
     }
     
     };
