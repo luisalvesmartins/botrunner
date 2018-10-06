@@ -76,6 +76,7 @@ async function main(context){
 	const dc = dialogs.createContext(context, state);
 
 	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,botName);
+	var initPointer=false;
 
 	if (context.activity.type === 'conversationUpdate' && context.activity.membersAdded[0].name !== 'Bot') {
 		 await context.sendActivity("## Welcome to the Bot!","Welcome to the bot");
@@ -84,10 +85,12 @@ async function main(context){
     if (context.activity.type === 'message') {
 		if (botPointer==-1)
 		{
+			initPointer=true;
 			botPointer=lambotenginecore.getBotPointerOfStart(myBot);
 			state.pointer=botPointer;
 			state.pointerKey=myBot[botPointer].key;
 			console.log("init pointer");
+			botPointer=await lambotenginecore.MoveBotPointer(myBot,botPointer,context.activity.text,state.UserActivityResults,state);
 		}
 
 		//PROCESS SPECIAL RESPONSE
@@ -121,7 +124,7 @@ async function main(context){
 			await dc.continue();
 		}
 		
-		if(!context.responded){
+		if(!context.responded || initPointer){
 			await lambotenginecore.RenderConversationThread(storage, state, session, context, dc, myBot)
 		}
 			
