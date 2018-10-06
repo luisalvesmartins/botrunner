@@ -76,18 +76,20 @@ async function main(context){
 	const dc = dialogs.createContext(context, state);
 
 	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,botName);
-	if (botPointer==-1)
-	{
-		botPointer=lambotenginecore.getBotPointerOfStart(myBot);
-		state.pointer=botPointer;
-		state.pointerKey=myBot[botPointer].key;
-	}
 
 	if (context.activity.type === 'conversationUpdate' && context.activity.membersAdded[0].name !== 'Bot') {
 		 await context.sendActivity("## Welcome to the Bot!","Welcome to the bot");
 		 //lambotenginecore.RenderConversationThread(storage, state, session, context, dc, myBot);
 	} else
     if (context.activity.type === 'message') {
+		if (botPointer==-1)
+		{
+			botPointer=lambotenginecore.getBotPointerOfStart(myBot);
+			state.pointer=botPointer;
+			state.pointerKey=myBot[botPointer].key;
+			console.log("init pointer");
+		}
+
 		//PROCESS SPECIAL RESPONSE
 		if (context.activity.text.toUpperCase().startsWith("DEBUG"))
 		{
@@ -95,17 +97,22 @@ async function main(context){
 			return;
 		}
 
+		var entGen = storage.TableUtilities.entityGenerator;
 		var task = {
-			PartitionKey: {'_':context.channelId},
-			RowKey: {'_': context.activity.id + "|" + context.activity.conversation.id},
-			description: {'_':context.activity.text},
-			botPointer: {'_':botPointer},
-			botName: {'_':botName}
+			PartitionKey: entGen.String("C" + context.activity.channelId),
+			RowKey: entGen.String(context.activity.id + "|" + context.activity.conversation.id),
+			description: entGen.String(context.activity.text),
+			botPointer: entGen.Int32(botPointer),
+			botName: entGen.String(botName)
 		};
 		tableSvc.insertEntity('botlog',task, function (error, result, response) {
 			if(!error){
 			  // Entity inserted
+			  console.log("entity saved")
 			}
+			else
+			console.log("No save")
+			console.log(task);
 		});
 		await lambotenginecore.PreProcessing(state,myBot,botPointer,context.activity.text)
 
