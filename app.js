@@ -62,7 +62,7 @@ else
 	});
 }
 //#endregion
-var botName='fsi.bot' || process.env.BOTNAME;
+//var botName='fsi.bot' || process.env.BOTNAME;
 
 async function main(context){
     const state = convoState.get(context);
@@ -90,18 +90,18 @@ async function main(context){
 			return;
 		}
 
-		var task = {
-			PartitionKey: {'_':context.channelId},
-			RowKey: {'_': context.activity.id + "|" + context.activity.conversation.id},
-			description: {'_':context.activity.text},
-			botPointer: {'_':botPointer},
-			botName: {'_':botName}
-		};
-		tableSvc.insertEntity('BOTLOG',task, function (error, result, response) {
-			if(!error){
-			  // Entity inserted
-			}
-		});
+		// var task = {
+		// 	PartitionKey: {'_':context.channelId},
+		// 	RowKey: {'_': context.activity.id + "|" + context.activity.conversation.id},
+		// 	description: {'_':context.activity.text},
+		// 	botPointer: {'_':botPointer},
+		// 	botName: {'_':botName}
+		// };
+		// tableSvc.insertEntity('BOTLOG',task, function (error, result, response) {
+		// 	if(!error){
+		// 	  // Entity inserted
+		// 	}
+		// });
 		await lambotenginecore.PreProcessing(state,myBot,botPointer,context.activity.text)
 
 		if(!context.responded){
