@@ -1,7 +1,6 @@
 //#region REQUIRE
-var lambotenginecore=require('./lambotenginecore');
+var lambotenginecore=require('../lambotenginecore');
 const { BotFrameworkAdapter, BotStateSet, ConsoleAdapter, ConversationState, MemoryStorage, UserState } = require('botbuilder');
-//const { TableStorage } = require('botbuilder-azure');
 const botbuilder_dialogs = require('botbuilder-dialogs');
 const restify = require('restify');
 const alexa= require('./alexaBridge/alexaBridge.js')
@@ -30,7 +29,11 @@ const convoState = new ConversationState(azureStorage);
 const userState  = new UserState(azureStorage);
 adapter.use(new BotStateSet(convoState, userState));
 const dialogs = new botbuilder_dialogs.DialogSet();
-  
+
+//FOR CONVERSATION LOGGING
+var tableSvc = storage.createTableService();
+tableSvc.createTableIfNotExists(process.env.LOGTABLE);
+
 dialogs.add('textPrompt', new botbuilder_dialogs.TextPrompt());
 
 //#region Start Console or Server
@@ -59,7 +62,7 @@ else
 	});
 }
 //#endregion
-
+var botName='fsi.bot' || process.env.BOTNAME;
 
 async function main(context){
     const state = convoState.get(context);
@@ -67,7 +70,7 @@ async function main(context){
     var session = state.session === undefined ? state.session=lambotenginecore.guid() : state.session;
 	const dc = dialogs.createContext(context, state);
 
-	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,"fsi.bot");
+	var myBot = await lambotenginecore.AsyncPromiseReadBotFromAzure(storage,botName);
 	if (botPointer==-1)
 	{
 		botPointer=lambotenginecore.getBotPointerOfStart(myBot);
@@ -87,6 +90,18 @@ async function main(context){
 			return;
 		}
 
+		var task = {
+			PartitionKey: {'_':context.channelId},
+			RowKey: {'_': context.activity.id + "|" + context.activity.conversation.id},
+			description: {'_':context.activity.text},
+			botPointer: {'_':botPointer},
+			botName: {'_':botName}
+		};
+		tableSvc.insertEntity('BOTLOG',task, function (error, result, response) {
+			if(!error){
+			  // Entity inserted
+			}
+		});
 		await lambotenginecore.PreProcessing(state,myBot,botPointer,context.activity.text)
 
 		if(!context.responded){
