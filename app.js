@@ -38,6 +38,7 @@ tableSvc.createTableIfNotExists('botlog', function(error, result, response) {
 	  // result contains true if created; false if already exists
 	}
   });
+var entGen = storage.TableUtilities.entityGenerator;
 
 dialogs.add('textPrompt', new botbuilder_dialogs.TextPrompt());
 
@@ -67,7 +68,7 @@ else
 	});
 }
 //#endregion
-var botName='fsi.bot' || process.env.BOTNAME;
+var botName=process.env.BOTNAME || 'fsi.bot';
 
 async function main(context){
     const state = convoState.get(context);
@@ -100,22 +101,19 @@ async function main(context){
 			return;
 		}
 
-		var entGen = storage.TableUtilities.entityGenerator;
 		var task = {
-			PartitionKey: entGen.String("C" + context.activity.channelId),
+			PartitionKey: entGen.String(context.activity.channelId),
 			RowKey: entGen.String(context.activity.id + "|" + context.activity.conversation.id),
 			description: entGen.String(context.activity.text),
 			botPointer: entGen.Int32(botPointer),
 			botName: entGen.String(botName)
 		};
-		tableSvc.insertEntity('botlog',task, function (error, result, response) {
-			if(!error){
+		tableSvc.insertEntity(process.env.LOGTABLE || 'botlog',task, function (error, result, response) {
+			if(error){
 			  // Entity inserted
-			  console.log("entity saved")
-			}
-			else
-			console.log("No save")
-			console.log(task);
+			  console.log("No save")
+			  console.log(task);
+			  }
 		});
 		await lambotenginecore.PreProcessing(state,myBot,botPointer,context.activity.text)
 
@@ -127,8 +125,17 @@ async function main(context){
 		if(!context.responded || initPointer){
 			await lambotenginecore.RenderConversationThread(storage, state, session, context, dc, myBot)
 		}
-			
+		
 
     }
-
 }
+
+global.howmany = function howmany (params) {
+	console.log("howmany was called with " + params);
+	return "Don't know yet how to call the main system to answer How many...";
+  }
+
+global.howmanywere = function howmany (params) {
+	console.log("howmanywere was called with " + params);
+	return "Don't know how to call How many were...";
+  }
