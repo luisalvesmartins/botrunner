@@ -137,17 +137,13 @@ global.howmany = function howmany (params) {
 	if (LUISEntities.length>0){
 		console.log(LUISEntities[0].entity);
 		var entity=LUISEntities[0].entity.toLowerCase();
-		var message=""
+
 		const ACCOUNTS="#accounts#bank accounts#account#";
 		const DEPOSIT_ACCOUNTS="#deposit account#deposit accounts#";
 		const CARDS="#card#cards#";
 		const INSURANCE="#insurance#insurance policy#insurance policies#";
 		const OFFICE_VISIT="#post office visit#post office visits#office visit#";
 		const ACCESS="#access#portal access#access to portal#portal visit#portal visits#";
-		if (ACCOUNTS + DEPOSIT_ACCOUNTS + CARDS + INSURANCE + OFFICE_VISIT + ACCESS.indexOf("#" + entity + "#")<0){
-			message+="Didn't recognize the entity you are looking for: " + entity;
-			return message;
-		}
 		if (ACCOUNTS.indexOf("#" + entity + "#")>-1){
 			return "We have 2100 accounts.";
 		}
@@ -167,7 +163,7 @@ global.howmany = function howmany (params) {
 			return "The number of Poste visits are 409503.";
 		}
 
-		return message;
+		return "Didn't recognize the entity you are looking for: " + entity;
 	}
   }
 
