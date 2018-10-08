@@ -131,8 +131,44 @@ async function main(context){
 }
 
 global.howmany = function howmany (params) {
+	params=params.substring(1,params.length-1);
 	console.log("howmany was called with " + params);
-	return "Don't know yet how to call the main system to answer How many...";
+	var LUISEntities=JSON.parse(params);
+	if (LUISEntities.length>0){
+		console.log(LUISEntities[0].entity);
+		var entity=LUISEntities[0].entity.toLowerCase();
+		var message=""
+		const ACCOUNTS="#accounts#bank accounts#account#";
+		const DEPOSIT_ACCOUNTS="#deposit account#deposit accounts#";
+		const CARDS="#card#cards#";
+		const INSURANCE="#insurance#insurance policy#insurance policies#";
+		const OFFICE_VISIT="#post office visit#post office visits#office visit#";
+		const ACCESS="#access#portal access#access to portal#portal visit#portal visits#";
+		if (ACCOUNTS + DEPOSIT_ACCOUNTS + CARDS + INSURANCE + OFFICE_VISIT + ACCESS.indexOf("#" + entity + "#")<0){
+			message+="Didn't recognize the entity you are looking for: " + entity;
+			return message;
+		}
+		if (ACCOUNTS.indexOf("#" + entity + "#")>-1){
+			return "We have 2100 accounts.";
+		}
+		if (DEPOSIT_ACCOUNTS.indexOf("#" + entity + "#")>-1){
+			return "We have 3421 deposit accounts.";
+		}
+		if (CARDS.indexOf("#" + entity + "#")>-1){
+			return "We have 9120 cards activated.";
+		}
+		if (INSURANCE.indexOf("#" + entity + "#")>-1){
+			return "There are 5120 insurance policies active.";
+		}
+		if (OFFICE_VISIT.indexOf("#" + entity + "#")>-1){
+			return "The daily visits are 157335.";
+		}
+		if (ACCESS.indexOf("#" + entity + "#")>-1){
+			return "The number of Poste visits are 409503.";
+		}
+
+		return message;
+	}
   }
 
 global.howmanywere = function howmany (params) {
