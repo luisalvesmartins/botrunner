@@ -144,7 +144,7 @@ global.howmany = function howmany (params) {
 			const DEPOSIT_ACCOUNTS="#deposit account#deposit accounts#";
 			const CARDS="#card#cards#";
 			const INSURANCE="#insurance#insurance policy#insurance policies#";
-			const OFFICE_VISIT="#post office visit#post office visits#office visit#";
+			const OFFICE_VISIT="#post office visit#post office visits#office visit#post visit#post visits#";
 			const ACCESS="#access#portal access#access to portal#portal visit#portal visits#";
 			if (ACCOUNTS.indexOf("#" + entity + "#")>-1){
 				return "We have 210055 accounts.";
@@ -165,7 +165,7 @@ global.howmany = function howmany (params) {
 				return "The number of Poste portal visits are 40950355";
 			}
 
-			return "Didn't recognize the entity you are looking for: " + entity;
+			return "Didn't recognize the entity you are looking for: " + entity + ". I recognize account, deposit account, card, insurance, post office visit, portal visit.";
 		}
 		else
 			return "Could not recognize the entity you are asking for";
