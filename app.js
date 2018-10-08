@@ -147,22 +147,22 @@ global.howmany = function howmany (params) {
 			const OFFICE_VISIT="#post office visit#post office visits#office visit#";
 			const ACCESS="#access#portal access#access to portal#portal visit#portal visits#";
 			if (ACCOUNTS.indexOf("#" + entity + "#")>-1){
-				return "We have 2100 accounts.";
+				return "We have 210055 accounts.";
 			}
 			if (DEPOSIT_ACCOUNTS.indexOf("#" + entity + "#")>-1){
-				return "We have 3421 deposit accounts.";
+				return "We have 342155 deposit accounts.";
 			}
 			if (CARDS.indexOf("#" + entity + "#")>-1){
-				return "We have 9120 cards activated.";
+				return "We have 912055 cards activated.";
 			}
 			if (INSURANCE.indexOf("#" + entity + "#")>-1){
-				return "There are 5120 insurance policies active.";
+				return "There are 512055 insurance policies active.";
 			}
 			if (OFFICE_VISIT.indexOf("#" + entity + "#")>-1){
-				return "The daily visits are 157335.";
+				return "The daily visits are 15733555";
 			}
 			if (ACCESS.indexOf("#" + entity + "#")>-1){
-				return "The number of Poste portal visits are 409503.";
+				return "The number of Poste portal visits are 40950355";
 			}
 
 			return "Didn't recognize the entity you are looking for: " + entity;
@@ -191,22 +191,22 @@ global.howmanywere = function howmany (params) {
 			const OFFICE_VISIT="#post office visit#post office visits#office visit#visit#visits#";
 			const ACCESS="#access#portal access#access to portal#portal visit#portal visits#";
 			if (ACCOUNTS.indexOf("#" + entity + "#")>-1){
-				return "2100 accounts were opened yesterday";
+				return "21009 accounts were opened yesterday";
 			}
 			if (DEPOSIT_ACCOUNTS.indexOf("#" + entity + "#")>-1){
-				return "3421 deposit accounts were opened yesterday";
+				return "34219 deposit accounts were opened yesterday";
 			}
 			if (CARDS.indexOf("#" + entity + "#")>-1){
-				return "9120 cards were activated yesterday";
+				return "91209 cards were activated yesterday";
 			}
 			if (INSURANCE.indexOf("#" + entity + "#")>-1){
-				return "5120 insurance policies active yesterday";
+				return "51209 insurance policies active yesterday";
 			}
 			if (OFFICE_VISIT.indexOf("#" + entity + "#")>-1){
-				return "The visits yesterday were 157335.";
+				return "The visits yesterday were 1573359";
 			}
 			if (ACCESS.indexOf("#" + entity + "#")>-1){
-				return "The number of Poste portal visits yesterday was 409503.";
+				return "The number of Poste portal visits yesterday was 409509";
 			}
 
 			return "Didn't recognize the entity you are looking for: " + entity;
