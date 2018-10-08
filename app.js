@@ -187,7 +187,7 @@ global.howmanywere = function howmany (params) {
 			const ACCOUNTS="#accounts#bank accounts#account#";
 			const DEPOSIT_ACCOUNTS="#deposit account#deposit accounts#";
 			const CARDS="#card#cards#";
-			const INSURANCE="#insurance#insurance policy#insurance policies#";
+			const INSURANCE="#insurance#insurance policy#insurance policies#policies#";
 			const OFFICE_VISIT="#post office visit#post office visits#office visit#visit#visits#";
 			const ACCESS="#access#portal access#access to portal#portal visit#portal visits#";
 			if (ACCOUNTS.indexOf("#" + entity + "#")>-1){
